@@ -33,7 +33,11 @@ const App = () => {
       <button onClick={() => setNeutral((prev) => prev + 1)}>neutral</button>
       <button onClick={() => setBad((prev) => prev + 1)}>bad</button>
 
-      <Statistics good={good} neutral={neutral} bad={bad} stats={stats} />
+      {stats.all ? (
+        <Statistics good={good} neutral={neutral} bad={bad} stats={stats} />
+      ) : (
+        <p>No feedback given</p>
+      )}
     </>
   );
 };
