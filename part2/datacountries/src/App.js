@@ -5,6 +5,19 @@ function App() {
   const [countries, setCountries] = useState([]);
   const [filter, setFilter] = useState('');
   const [countrySelected, setCountrySelected] = useState('');
+  const [countryWeather, setCountryWeather] = useState('');
+
+  useEffect(() => {
+    const api_key = process.env.REACT_APP_API_KEY;
+    if (countrySelected) {
+      axios
+        .get(
+          `https://api.openweathermap.org/data/2.5/weather?q=${countrySelected.capital}&units=metric&APPID=${api_key}`
+        )
+        .then((response) => response.data)
+        .then((data) => setCountryWeather(data));
+    } else setCountryWeather('');
+  }, [countrySelected]);
 
   useEffect(() => {
     axios
@@ -17,7 +30,7 @@ function App() {
   countries.forEach((country) => {
     const name = country.name.common;
     if (name.toLowerCase().includes(filter.toLowerCase())) {
-      countriesFilter.push(name);
+      countriesFilter.push(country);
     }
   });
 
@@ -25,14 +38,16 @@ function App() {
     if (countrySelected) {
       return showCountry(countrySelected);
     }
+
     if (countriesFilter.length > 10) {
       return <div>Too many matches, specify another filter</div>;
     }
     if (countriesFilter.length > 1) {
       return countriesFilter.map((country) => {
+        const name = country.name.common;
         return (
-          <div key={country}>
-            {country + ' '}
+          <div key={name}>
+            {name + ' '}
             <button
               onClick={() => {
                 setCountrySelected(country);
@@ -45,16 +60,12 @@ function App() {
       });
     }
     if (countriesFilter.length === 1) {
-      return showCountry(countriesFilter[0]);
+      return setCountrySelected(countriesFilter[0]);
     }
     return <div>Not found</div>;
   };
 
-  const showCountry = (name) => {
-    const filterCountry = countries.filter(
-      (country) => country.name.common === name
-    );
-    const country = filterCountry[0];
+  const showCountry = (country) => {
     return (
       <div>
         <h1>{country.name.common}</h1>
@@ -70,6 +81,18 @@ function App() {
         </ul>
 
         <img src={country.flags.png} alt={`${country.name.common} flag`} />
+
+        {countryWeather && (
+          <div>
+            <h2>Weather in {country.capital[0]}</h2>
+            <div>temperature {countryWeather.main.temp} Celcius</div>
+            <img
+              src={`http://openweathermap.org/img/wn/${countryWeather.weather[0].icon}@2x.png`}
+              alt={countryWeather.weather[0].description}
+            />
+            <div>wind {countryWeather.wind.speed} m/s</div>
+          </div>
+        )}
       </div>
     );
   };
@@ -82,7 +105,7 @@ function App() {
   return (
     <div className="App">
       <div>
-        find countries
+        find countries{' '}
         <input type="text" value={filter} onChange={handleChange} />
       </div>
       <div>{displayCountries()}</div>
