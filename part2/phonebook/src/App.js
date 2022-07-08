@@ -16,19 +16,43 @@ const App = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (persons.some((person) => person.name === newName)) {
-      return alert(`${newName} is already added to phonebook`);
-    }
+    /* if (persons.some((person) => person.name === newName)) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        personsService.update()
+      }
+      return undefined;
+    } */
 
     const newPerson = {
       name: newName,
       number: newPhone,
     };
 
-    personsService
-      .create(newPerson)
-      .then((data) => setPersons(persons.concat(data)));
+    const alreadyExists = persons.find((person) => (person.name = newName));
 
+    if (alreadyExists) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        personsService
+          .update(alreadyExists.id, newPerson)
+          .then((data) =>
+            setPersons((prevState) =>
+              prevState.map((person) => (person.id === data.id ? data : person))
+            )
+          );
+      }
+    } else {
+      personsService
+        .create(newPerson)
+        .then((data) => setPersons(persons.concat(data)));
+    }
     setNewName('');
     setNewPhone('');
   };
