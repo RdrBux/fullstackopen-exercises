@@ -11,9 +11,6 @@ const App = () => {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    /* axios
-      .get('http://localhost:3001/persons')
-      .then((response) => setPersons(response.data)); */
     personsService.getAll().then((list) => setPersons(list));
   }, []);
 
@@ -28,15 +25,22 @@ const App = () => {
       number: newPhone,
     };
 
-    /* axios.post('http://localhost:3001/persons', newPerson); */
-    personsService.create(newPerson);
+    personsService
+      .create(newPerson)
+      .then((data) => setPersons(persons.concat(data)));
 
-    setPersons(persons.concat(newPerson));
     setNewName('');
     setNewPhone('');
   };
 
   const handleFilter = (e) => setFilter(e.target.value);
+
+  const removePerson = (id, name) => {
+    if (window.confirm(`Delete ${name} ?`)) {
+      personsService.remove(id);
+      setPersons(persons.filter((person) => person.id !== id));
+    }
+  };
 
   return (
     <div>
@@ -53,7 +57,11 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <NumbersList persons={persons} filter={filter} />
+      <NumbersList
+        persons={persons}
+        filter={filter}
+        removePerson={removePerson}
+      />
     </div>
   );
 };
