@@ -3,12 +3,14 @@ import Filter from './components/Filter';
 import NewPerson from './components/NewPerson';
 import NumbersList from './components/NumbersList';
 import personsService from './services/persons';
+import Notification from './components/Notification';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [filter, setFilter] = useState('');
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     personsService.getAll().then((list) => setPersons(list));
@@ -16,23 +18,13 @@ const App = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    /* if (persons.some((person) => person.name === newName)) {
-      if (
-        window.confirm(
-          `${newName} is already added to phonebook, replace the old number with a new one?`
-        )
-      ) {
-        personsService.update()
-      }
-      return undefined;
-    } */
 
     const newPerson = {
       name: newName,
       number: newPhone,
     };
 
-    const alreadyExists = persons.find((person) => (person.name = newName));
+    const alreadyExists = persons.find((person) => person.name === newName);
 
     if (alreadyExists) {
       if (
@@ -40,18 +32,18 @@ const App = () => {
           `${newName} is already added to phonebook, replace the old number with a new one?`
         )
       ) {
-        personsService
-          .update(alreadyExists.id, newPerson)
-          .then((data) =>
-            setPersons((prevState) =>
-              prevState.map((person) => (person.id === data.id ? data : person))
-            )
+        personsService.update(alreadyExists.id, newPerson).then((data) => {
+          setPersons((prevState) =>
+            prevState.map((person) => (person.id === data.id ? data : person))
           );
+          showNotification(data.name, true);
+        });
       }
     } else {
-      personsService
-        .create(newPerson)
-        .then((data) => setPersons(persons.concat(data)));
+      personsService.create(newPerson).then((data) => {
+        setPersons(persons.concat(data));
+        showNotification(newPerson.name);
+      });
     }
     setNewName('');
     setNewPhone('');
@@ -66,9 +58,19 @@ const App = () => {
     }
   };
 
+  const showNotification = (name, existing = false) => {
+    if (existing) {
+      setNotification(`Changed ${name} number`);
+    } else {
+      setNotification(`Added ${name}`);
+    }
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} />
       <Filter filter={filter} handleFilter={handleFilter} />
 
       <h2>add a new</h2>
