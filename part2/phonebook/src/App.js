@@ -10,7 +10,10 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [filter, setFilter] = useState('');
-  const [notification, setNotification] = useState(null);
+  const [notification, setNotification] = useState({
+    message: null,
+    isError: false,
+  });
 
   useEffect(() => {
     personsService.getAll().then((list) => setPersons(list));
@@ -53,24 +56,37 @@ const App = () => {
 
   const removePerson = (id, name) => {
     if (window.confirm(`Delete ${name} ?`)) {
-      personsService.remove(id);
+      personsService
+        .remove(id)
+        .catch(() => showNotification(name, false, true));
       setPersons(persons.filter((person) => person.id !== id));
     }
   };
 
-  const showNotification = (name, existing = false) => {
+  const showNotification = (name, existing = false, isError = false) => {
     if (existing) {
-      setNotification(`Changed ${name} number`);
+      setNotification({
+        message: `Changed ${name} number`,
+        isError: isError,
+      });
+    } else if (!isError) {
+      setNotification({
+        message: `Added ${name}`,
+        isError: isError,
+      });
     } else {
-      setNotification(`Added ${name}`);
+      setNotification({
+        message: `Information of ${name} has already been removed from server`,
+        isError: isError,
+      });
     }
-    setTimeout(() => setNotification(null), 3000);
+    setTimeout(() => setNotification({ message: null, isError: false }), 3000);
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notification} />
+      <Notification notification={notification} />
       <Filter filter={filter} handleFilter={handleFilter} />
 
       <h2>add a new</h2>

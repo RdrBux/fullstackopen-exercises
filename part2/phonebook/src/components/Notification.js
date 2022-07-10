@@ -1,20 +1,20 @@
 import React from 'react';
 
-const Notification = ({ message }) => {
+const Notification = ({ notification }) => {
   const styles = {
-    color: 'green',
+    color: notification.isError ? 'red' : 'green',
     backgroundColor: 'lightgrey',
     fontSize: 20,
     border: 'solid',
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    display: message ? 'block' : 'none',
+    display: notification.message ? 'block' : 'none',
   };
 
   return (
     <div className="notification" style={styles}>
-      {message}
+      {notification.message}
     </div>
   );
 };
