@@ -42,7 +42,6 @@ app.get('/api/persons', (request, response) => {
 app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then((pers) => {
-      console.log(pers);
       if (pers) {
         response.json(pers);
       } else {
@@ -85,6 +84,19 @@ app.post('/api/persons', (request, response) => {
   });
 
   newPerson.save().then((savedPerson) => response.json(savedPerson));
+});
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body;
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  };
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then((updatedPerson) => response.json(updatedPerson))
+    .catch((err) => next(err));
 });
 
 const unknownEndpoint = (request, response) => {
