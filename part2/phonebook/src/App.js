@@ -35,18 +35,30 @@ const App = () => {
           `${newName} is already added to phonebook, replace the old number with a new one?`
         )
       ) {
-        personsService.update(alreadyExists.id, newPerson).then((data) => {
-          setPersons((prevState) =>
-            prevState.map((person) => (person.id === data.id ? data : person))
-          );
-          showNotification(data.name, true);
-        });
+        personsService
+          .update(alreadyExists.id, newPerson)
+          .then((data) => {
+            setPersons((prevState) =>
+              prevState.map((person) => (person.id === data.id ? data : person))
+            );
+            showNotification(`Changed ${alreadyExists.name} number`);
+          })
+          .catch((err) => {
+            showNotification(`${err.response.data.error}`, true);
+            console.log(err.response.data.error);
+          });
       }
     } else {
-      personsService.create(newPerson).then((data) => {
-        setPersons(persons.concat(data));
-        showNotification(newPerson.name);
-      });
+      personsService
+        .create(newPerson)
+        .then((data) => {
+          setPersons(persons.concat(data));
+          showNotification(`Added ${newPerson.name}`);
+        })
+        .catch((err) => {
+          showNotification(`${err.response.data.error}`, true);
+          console.log(err.response.data.error);
+        });
     }
     setNewName('');
     setNewPhone('');
@@ -58,12 +70,25 @@ const App = () => {
     if (window.confirm(`Delete ${name} ?`)) {
       personsService
         .remove(id)
-        .catch(() => showNotification(name, false, true));
+        .catch(() =>
+          showNotification(
+            `Information of ${name} has already been removed from server`,
+            true
+          )
+        );
       setPersons(persons.filter((person) => person.id !== id));
     }
   };
 
-  const showNotification = (name, existing = false, isError = false) => {
+  const showNotification = (text, isError = false) => {
+    setNotification({
+      message: text,
+      isError: isError,
+    });
+    setTimeout(() => setNotification({ message: null, isError: false }), 3000);
+  };
+
+  /*   const showNotification = (name, existing = false, isError = false) => {
     if (existing) {
       setNotification({
         message: `Changed ${name} number`,
@@ -81,7 +106,7 @@ const App = () => {
       });
     }
     setTimeout(() => setNotification({ message: null, isError: false }), 3000);
-  };
+  }; */
 
   return (
     <div>
