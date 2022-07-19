@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-argvLen = process.argv.length;
+const argvLen = process.argv.length;
 if (argvLen < 3) {
   console.log(
     'Please provide the password as an argument: node mongo.js <password>'
@@ -24,7 +24,7 @@ const Person = mongoose.model('Person', personSchema);
 if (argvLen === 5) {
   mongoose
     .connect(url)
-    .then((result) => {
+    .then(() => {
       console.log('connected');
 
       const person = new Person({
@@ -42,7 +42,7 @@ if (argvLen === 5) {
 }
 
 if (argvLen === 3) {
-  mongoose.connect(url).then((result) => {
+  mongoose.connect(url).then(() => {
     console.log('phonebook:');
 
     Person.find({}).then((result) => {
