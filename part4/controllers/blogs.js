@@ -7,12 +7,15 @@ blogsRouter.get('/', (request, response) => {
   });
 });
 
-blogsRouter.post('/api/blogs', (request, response) => {
+blogsRouter.post('/', (request, response, next) => {
   const blog = new Blog(request.body);
 
-  blog.save().then((result) => {
-    response.status(201).json(result);
-  });
+  blog
+    .save()
+    .then((result) => {
+      response.status(201).json(result);
+    })
+    .catch((err) => next(err));
 });
 
 module.exports = blogsRouter;
