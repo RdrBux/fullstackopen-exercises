@@ -19,4 +19,32 @@ const favoriteBlog = (blogs) => {
   return { title: fav.title, author: fav.author, likes: fav.likes };
 };
 
-module.exports = { dummy, totalLikes, favoriteBlog };
+const mostBlogs = (blogs) => {
+  if (blogs.length < 1) {
+    return 'WARNING: empty list';
+  }
+
+  const blogCountByAuthor = blogs.reduce((allAuthors, author) => {
+    const name = author.author;
+    if (name in allAuthors) {
+      allAuthors[name] += 1;
+    } else {
+      allAuthors[name] = 1;
+    }
+    return allAuthors;
+  }, {});
+
+  let count = 0;
+  let author = '';
+
+  for (const prop in blogCountByAuthor) {
+    if (blogCountByAuthor[prop] > count) {
+      count = blogCountByAuthor[prop];
+      author = prop;
+    }
+  }
+
+  return { author: author, blogs: count };
+};
+
+module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs };
