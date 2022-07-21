@@ -9,4 +9,14 @@ const totalLikes = (blogs) => {
   return sum;
 };
 
-module.exports = { dummy, totalLikes };
+const favoriteBlog = (blogs) => {
+  if (blogs.length < 1) {
+    return 'WARNING: empty list';
+  }
+
+  const sortedByLikes = [...blogs].sort((a, b) => b.likes - a.likes);
+  const fav = sortedByLikes[0];
+  return { title: fav.title, author: fav.author, likes: fav.likes };
+};
+
+module.exports = { dummy, totalLikes, favoriteBlog };
