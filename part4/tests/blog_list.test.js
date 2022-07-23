@@ -5,6 +5,8 @@ const api = supertest(app);
 
 const Blog = require('../models/blog');
 
+// HELPERS
+
 const initialBlogs = [
   {
     title: 'React patterns',
@@ -63,6 +65,22 @@ test('can create a new blog post', async () => {
 
   const newTitle = newBlogs.body.map((blog) => blog.title);
   expect(newTitle).toContain('First class tests');
+});
+
+test('the likes property defaults to 0 if is missing from request', async () => {
+  const newBlog = {
+    title: 'First class tests',
+    author: 'Robert C. Martin',
+    url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
+  };
+  await api.post('/api/blogs').send(newBlog).expect(201);
+
+  const blogs = await api.get('/api/blogs');
+  const findBlog = blogs.body.filter(
+    (blog) => blog.title === 'First class tests'
+  )[0];
+  console.log(findBlog);
+  expect(findBlog.likes).toBe(0);
 });
 
 afterAll(() => mongoose.connection.close());
