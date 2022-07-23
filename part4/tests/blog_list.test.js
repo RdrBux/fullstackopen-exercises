@@ -79,8 +79,27 @@ test('the likes property defaults to 0 if is missing from request', async () => 
   const findBlog = blogs.body.filter(
     (blog) => blog.title === 'First class tests'
   )[0];
-  console.log(findBlog);
   expect(findBlog.likes).toBe(0);
+});
+
+test('title property is required to post new blogs', async () => {
+  const newBlog = {
+    author: 'Robert C. Martin',
+    url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
+    likes: 10,
+  };
+
+  await api.post('/api/blogs').send(newBlog).expect(400);
+});
+
+test('url property is required to post new blogs', async () => {
+  const newBlog = {
+    title: 'First class tests',
+    author: 'Robert C. Martin',
+    likes: 10,
+  };
+
+  await api.post('/api/blogs').send(newBlog).expect(400);
 });
 
 afterAll(() => mongoose.connection.close());
