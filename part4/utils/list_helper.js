@@ -65,8 +65,6 @@ const mostLikes = (blogs) => {
   let count = 0;
   let author = '';
 
-  console.log(blogCountByAuthor);
-
   for (const prop in blogCountByAuthor) {
     if (blogCountByAuthor[prop] > count) {
       count = blogCountByAuthor[prop];
