@@ -109,10 +109,9 @@ describe('Viewing a specific note', () => {
 
 describe('On deletion of a blog', () => {
   test('success with status of 204 if id is valid', async () => {
-    const Blogs = await api.get('/api/blogs');
-    const startBlogs = Blogs.body;
+    const blogs = await api.get('/api/blogs');
+    const startBlogs = blogs.body;
 
-    console.log(startBlogs);
     await api.delete(`/api/blogs/${startBlogs[0].id}`).expect(204);
 
     const endBlogs = await api.get('/api/blogs');
@@ -120,14 +119,41 @@ describe('On deletion of a blog', () => {
   });
 
   test('fails with status of 400 if id is invalid', async () => {
-    const Blogs = await api.get('/api/blogs');
-    const startBlogs = Blogs.body;
+    const blogs = await api.get('/api/blogs');
+    const startBlogs = blogs.body;
 
-    console.log(startBlogs);
     await api.delete('/api/blogs/abc').expect(400);
 
     const endBlogs = await api.get('/api/blogs');
     expect(endBlogs.body).toHaveLength(startBlogs.length);
+  });
+});
+
+describe('When updating an existing blog', () => {
+  test('Updates the ammount of likes on an existing post', async () => {
+    const blogs = await api.get('/api/blogs');
+    const firstBlog = blogs.body[0];
+
+    await api
+      .put(`/api/blogs/${firstBlog.id}`)
+      .send({ ...firstBlog, likes: 300 })
+      .expect(200);
+
+    const newBlogs = await api.get('/api/blogs');
+    const newBlogsBody = newBlogs.body;
+    const updatedBlog = newBlogsBody.filter((blog) => blog.id === firstBlog.id);
+
+    expect(updatedBlog[0].likes).toBe(300);
+  });
+
+  test('fails when trying to update an invalid id', async () => {
+    const blogs = await api.get('/api/blogs');
+    const firstBlog = blogs.body[0];
+
+    await api
+      .put('/api/blogs/abc')
+      .send({ ...firstBlog, likes: 300 })
+      .expect(400);
   });
 });
 
