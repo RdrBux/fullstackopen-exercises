@@ -32,7 +32,7 @@ beforeEach(async () => {
   await Promise.all(promiseArray);
 });
 
-describe('When there are initially some notes saved', () => {
+describe('When there are initially some blogs saved', () => {
   test('blogs are returned as JSON', async () => {
     await api
       .get('/api/blogs')
@@ -51,7 +51,7 @@ describe('When there are initially some notes saved', () => {
   });
 });
 
-describe('Viewing a specific note', () => {
+describe.only('Viewing a specific blog', () => {
   test('can create a new blog post', async () => {
     const newBlog = {
       title: 'First class tests',
@@ -163,7 +163,7 @@ const usersInDb = async () => {
   return users.map((u) => u.toJSON());
 };
 
-describe.only('when there is initially one user in db', () => {
+describe('when there is initially one user in db', () => {
   beforeEach(async () => {
     await User.deleteMany({});
 
