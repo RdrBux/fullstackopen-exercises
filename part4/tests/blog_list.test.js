@@ -24,6 +24,18 @@ const initialBlogs = [
   },
 ];
 
+let token = '';
+beforeAll(async () => {
+  const firstUser = {
+    username: 'testing',
+    name: 'Testing',
+    password: 'abc123',
+  };
+  await api.post('/api/users').send(firstUser);
+  const userInfo = await api.post('/api/login').send(firstUser);
+  token = userInfo.body.token;
+});
+
 beforeEach(async () => {
   await Blog.deleteMany({});
 
@@ -36,6 +48,7 @@ describe('When there are initially some blogs saved', () => {
   test('blogs are returned as JSON', async () => {
     await api
       .get('/api/blogs')
+      .set('Authorization', 'abc123')
       .expect(200)
       .expect('Content-Type', /application\/json/);
   });
@@ -51,7 +64,7 @@ describe('When there are initially some blogs saved', () => {
   });
 });
 
-describe.only('Viewing a specific blog', () => {
+describe('Viewing a specific blog', () => {
   test('can create a new blog post', async () => {
     const newBlog = {
       title: 'First class tests',
@@ -61,6 +74,7 @@ describe.only('Viewing a specific blog', () => {
     };
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -72,13 +86,27 @@ describe.only('Viewing a specific blog', () => {
     expect(newTitle).toContain('First class tests');
   });
 
+  test('adding a blog fails if a token is not provided', async () => {
+    const newBlog = {
+      title: 'First class tests',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
+      likes: 10,
+    };
+    await api.post('/api/blogs').send(newBlog).expect(401);
+  });
+
   test('the likes property defaults to 0 if is missing from request', async () => {
     const newBlog = {
       title: 'First class tests',
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
     };
-    await api.post('/api/blogs').send(newBlog).expect(201);
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newBlog)
+      .expect(201);
 
     const blogs = await api.get('/api/blogs');
     const findBlog = blogs.body.filter(
@@ -94,7 +122,11 @@ describe.only('Viewing a specific blog', () => {
       likes: 10,
     };
 
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newBlog)
+      .expect(400);
   });
 
   test('url property is required to post new blogs', async () => {
@@ -104,16 +136,35 @@ describe.only('Viewing a specific blog', () => {
       likes: 10,
     };
 
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newBlog)
+      .expect(400);
   });
 });
 
 describe('On deletion of a blog', () => {
   test('success with status of 204 if id is valid', async () => {
+    const newBlog = {
+      title: 'Blog created by user to be deleted',
+      author: 'myself',
+      url: 'http://delete.me',
+      likes: 10,
+    };
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newBlog);
+
     const blogs = await api.get('/api/blogs');
     const startBlogs = blogs.body;
 
-    await api.delete(`/api/blogs/${startBlogs[0].id}`).expect(204);
+    await api
+      .delete(`/api/blogs/${startBlogs[startBlogs.length - 1].id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204);
 
     const endBlogs = await api.get('/api/blogs');
     expect(endBlogs.body).toHaveLength(startBlogs.length - 1);
@@ -123,7 +174,10 @@ describe('On deletion of a blog', () => {
     const blogs = await api.get('/api/blogs');
     const startBlogs = blogs.body;
 
-    await api.delete('/api/blogs/abc').expect(400);
+    await api
+      .delete('/api/blogs/abc')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(400);
 
     const endBlogs = await api.get('/api/blogs');
     expect(endBlogs.body).toHaveLength(startBlogs.length);
