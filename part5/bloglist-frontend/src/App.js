@@ -4,6 +4,7 @@ import BlogForm from './components/BlogForm';
 import LoginForm from './components/LoginForm';
 import blogService from './services/blogs';
 import loginService from './services/login';
+import Notification from './components/Notification';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -13,6 +14,11 @@ const App = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [url, setUrl] = useState('');
+  const [newBlog, setNewBlog] = useState(false);
+  const [notification, setNotification] = useState({
+    message: null,
+    isError: false,
+  });
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
@@ -24,9 +30,8 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    // Add an element to the array dependencies to refresh the bloglist when added a new blog
     blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
+  }, [newBlog]);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -43,11 +48,10 @@ const App = () => {
       setUsername('');
       setPassword('');
     } catch (exception) {
-      /* setErrorMessage('Wrong credentials')
+      setNotification({ message: 'Wrong credentials', isError: true });
       setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000) */
-      console.log(exception);
+        setNotification({ message: null, isError: false });
+      }, 5000);
     }
   };
 
@@ -56,23 +60,43 @@ const App = () => {
     setUser(null);
   };
 
-  const handleCreate = (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
-    blogService.create({
-      title: title,
-      author: author,
-      url: url,
-    });
 
-    setTitle('');
-    setAuthor('');
-    setUrl('');
+    try {
+      await blogService.create({
+        title: title,
+        author: author,
+        url: url,
+      });
+
+      setNotification({
+        message: `a new blog ${title} by ${author} added`,
+        isError: false,
+      });
+      setNewBlog((prev) => !prev);
+      setTitle('');
+      setAuthor('');
+      setUrl('');
+
+      setTimeout(
+        () => setNotification({ message: null, isError: false }),
+        3000
+      );
+    } catch (err) {
+      setNotification({ message: err.response.data.error, isError: true });
+      setTimeout(
+        () => setNotification({ message: null, isError: false }),
+        3000
+      );
+    }
   };
 
   if (user === null) {
     return (
       <div>
         <h2>Log in to application</h2>
+        <Notification notification={notification} />
         <LoginForm
           handleLogin={handleLogin}
           username={username}
@@ -87,6 +111,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
+      <Notification notification={notification} />
       <p>
         {user.name} logged in <button onClick={logOut}>log out</button>
       </p>
