@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Blog from './components/Blog';
+import BlogForm from './components/BlogForm';
 import LoginForm from './components/LoginForm';
 import blogService from './services/blogs';
 import loginService from './services/login';
@@ -9,6 +10,9 @@ const App = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [url, setUrl] = useState('');
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
@@ -20,6 +24,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    // Add an element to the array dependencies to refresh the bloglist when added a new blog
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
 
@@ -51,6 +56,19 @@ const App = () => {
     setUser(null);
   };
 
+  const handleCreate = (e) => {
+    e.preventDefault();
+    blogService.create({
+      title: title,
+      author: author,
+      url: url,
+    });
+
+    setTitle('');
+    setAuthor('');
+    setUrl('');
+  };
+
   if (user === null) {
     return (
       <div>
@@ -72,6 +90,18 @@ const App = () => {
       <p>
         {user.name} logged in <button onClick={logOut}>log out</button>
       </p>
+
+      <h2>create new</h2>
+      <BlogForm
+        title={title}
+        setTitle={setTitle}
+        author={author}
+        setAuthor={setAuthor}
+        url={url}
+        setUrl={setUrl}
+        handleCreate={handleCreate}
+      />
+
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}
