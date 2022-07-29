@@ -32,13 +32,36 @@ const App = () => {
 
   const blogFormRef = useRef();
 
-  const updateLikes = (blogId, newBlog) => {
-    blogService.update(blogId, newBlog);
-    setBlogs((prevBlogs) =>
-      prevBlogs.map((blog) =>
-        blog.id === blogId ? { ...blog, likes: blog.likes + 1 } : blog
-      )
-    );
+  const updateLikes = async (blogId, newBlog) => {
+    try {
+      await blogService.update(blogId, newBlog);
+      setBlogs((prevBlogs) =>
+        prevBlogs.map((blog) =>
+          blog.id === blogId ? { ...blog, likes: blog.likes + 1 } : blog
+        )
+      );
+    } catch (err) {
+      setNotification({ message: err.response.data.error, isError: true });
+      setTimeout(
+        () => setNotification({ message: null, isError: false }),
+        5000
+      );
+    }
+  };
+
+  const removeBlog = async (blogId, newBlog) => {
+    try {
+      if (window.confirm(`Remove blog ${newBlog.title} by ${newBlog.author}`)) {
+        await blogService.remove(blogId);
+        setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
+      }
+    } catch (err) {
+      setNotification({ message: err.response.data.error, isError: true });
+      setTimeout(
+        () => setNotification({ message: null, isError: false }),
+        5000
+      );
+    }
   };
 
   const handleLogin = async (event) => {
@@ -123,7 +146,13 @@ const App = () => {
       {blogs
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <Blog key={blog.id} blog={blog} handleLikes={updateLikes} />
+          <Blog
+            key={blog.id}
+            blog={blog}
+            handleLikes={updateLikes}
+            remove={removeBlog}
+            username={user.username}
+          />
         ))}
     </div>
   );
