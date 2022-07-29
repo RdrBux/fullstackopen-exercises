@@ -32,6 +32,15 @@ const App = () => {
 
   const blogFormRef = useRef();
 
+  const updateLikes = (blogId, newBlog) => {
+    blogService.update(blogId, newBlog);
+    setBlogs((prevBlogs) =>
+      prevBlogs.map((blog) =>
+        blog.id === blogId ? { ...blog, likes: blog.likes + 1 } : blog
+      )
+    );
+  };
+
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -112,7 +121,7 @@ const App = () => {
       </Togglable>
 
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} handleLikes={updateLikes} />
       ))}
     </div>
   );

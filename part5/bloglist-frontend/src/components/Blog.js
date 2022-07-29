@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, handleLikes }) => {
   const [details, setDetails] = useState(false);
 
   const blogStyle = {
@@ -9,6 +9,16 @@ const Blog = ({ blog }) => {
     border: 'solid',
     borderWidth: 1,
     marginBottom: 5,
+  };
+
+  const newBlog = () => {
+    return {
+      user: blog.user.id,
+      likes: blog.likes + 1,
+      author: blog.author,
+      title: blog.title,
+      url: blog.url,
+    };
   };
 
   return (
@@ -20,7 +30,8 @@ const Blog = ({ blog }) => {
       <div style={{ display: details ? 'block' : 'none' }}>
         <div>{blog.url}</div>
         <div>
-          likes {blog.likes} <button>like</button>
+          likes {blog.likes}{' '}
+          <button onClick={() => handleLikes(blog.id, newBlog())}>like</button>
         </div>
         <div>{blog.user.name}</div>
       </div>
