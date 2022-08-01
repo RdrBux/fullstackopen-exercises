@@ -51,4 +51,17 @@ describe('Interactions with blogs', () => {
     expect(urlEnd).toBeVisible();
     expect(likesEnd).toBeVisible();
   });
+
+  test('If the like button is clicked twice, the event handled is called twice', async () => {
+    const mockHandler = jest.fn();
+
+    render(<Blog blog={blog} handleLikes={mockHandler} />);
+
+    const user = userEvent.setup();
+    const button = screen.getByText('like');
+    await user.click(button);
+    await user.click(button);
+
+    expect(mockHandler.mock.calls).toHaveLength(2);
+  });
 });
