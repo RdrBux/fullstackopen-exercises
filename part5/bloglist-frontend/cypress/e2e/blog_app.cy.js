@@ -38,9 +38,7 @@ describe('Blog app', function () {
 
   describe('When logged in', function () {
     beforeEach(function () {
-      cy.get('#username').type('super');
-      cy.get('#password').type('abc123');
-      cy.get('#login-button').click();
+      cy.login({ username: 'super', password: 'abc123' });
     });
 
     it('A blog can be created', function () {
@@ -53,6 +51,21 @@ describe('Blog app', function () {
       cy.get('#create-button').click();
 
       cy.get('.blogs-container').contains('blog-title blog-author');
+    });
+
+    it('Users can like a blog', function () {
+      cy.createBlog({
+        title: 'Title 1',
+        author: 'Author 1',
+        url: 'http://url1.com',
+      });
+
+      cy.contains('Title 1 Author 1').find('.details-button').click();
+
+      cy.contains('likes 0');
+
+      cy.get('.like-button').click();
+      cy.contains('likes 1');
     });
   });
 });

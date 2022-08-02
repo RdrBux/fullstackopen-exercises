@@ -35,14 +35,22 @@ const Blog = ({ blog, handleLikes, remove, username }) => {
   return (
     <div style={blogStyle}>
       {blog.title} {blog.author}{' '}
-      <button onClick={() => setDetails((prev) => !prev)}>
+      <button
+        className="details-button"
+        onClick={() => setDetails((prev) => !prev)}
+      >
         {details ? 'hide' : 'view'}
       </button>
       <div style={{ display: details ? 'block' : 'none' }}>
         <div>{blog.url}</div>
         <div>
           likes {blog.likes}{' '}
-          <button onClick={() => handleLikes(blog.id, newBlog())}>like</button>
+          <button
+            className="like-button"
+            onClick={() => handleLikes(blog.id, newBlog())}
+          >
+            like
+          </button>
         </div>
         <div>{blog.user.name}</div>
         {showRemoveButton()}
