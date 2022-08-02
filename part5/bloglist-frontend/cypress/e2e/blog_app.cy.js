@@ -108,5 +108,32 @@ describe('Blog app', function () {
         .find('.remove-button')
         .should('not.exist');
     });
+
+    it('Blogs are ordered according to higher likes count', function () {
+      cy.createBlog({
+        title: 'Blog with third most likes',
+        author: 'Author 1',
+        url: 'http://url1.com',
+        likes: 1,
+      });
+
+      cy.createBlog({
+        title: 'Blog with most likes',
+        author: 'Author 1',
+        url: 'http://url1.com',
+        likes: 100,
+      });
+
+      cy.createBlog({
+        title: 'Blog with second most likes',
+        author: 'Author 1',
+        url: 'http://url1.com',
+        likes: 10,
+      });
+
+      cy.get('.blog').eq(0).should('contain', 'Blog with most likes');
+      cy.get('.blog').eq(1).should('contain', 'Blog with second most likes');
+      cy.get('.blog').eq(2).should('contain', 'Blog with third most likes');
+    });
   });
 });

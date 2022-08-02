@@ -38,7 +38,7 @@ const Blog = ({ blog, handleLikes, remove, username }) => {
   };
 
   return (
-    <div style={blogStyle}>
+    <div className="blog" style={blogStyle}>
       {blog.title} {blog.author}{' '}
       <button
         className="details-button"
