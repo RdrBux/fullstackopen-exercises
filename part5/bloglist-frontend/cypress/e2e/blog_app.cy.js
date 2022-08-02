@@ -67,5 +67,46 @@ describe('Blog app', function () {
       cy.get('.like-button').click();
       cy.contains('likes 1');
     });
+
+    it('Creator of blog can delete it', function () {
+      cy.createBlog({
+        title: 'Title 1',
+        author: 'Author 1',
+        url: 'http://url1.com',
+      });
+
+      cy.contains('Title 1 Author 1').find('.details-button').click();
+
+      cy.get('.remove-button').click();
+
+      cy.get('.blogs-container').should('not.contain', 'Title 1 Author 1');
+    });
+
+    it('Users cannot delete blogs they did not create', function () {
+      cy.createBlog({
+        title: 'Title 1',
+        author: 'Author 1',
+        url: 'http://url1.com',
+      });
+
+      const secondUser = {
+        name: 'SecondUser',
+        username: 'second',
+        password: 'abc123',
+      };
+      cy.request('POST', 'http://localhost:3003/api/users/', secondUser);
+      cy.login({ username: 'second', password: 'abc123' });
+
+      cy.createBlog({
+        title: 'Title 2',
+        author: 'Author 2',
+        url: 'http://url2.com',
+      });
+
+      cy.contains('Title 1 Author 1').find('.details-button').click();
+      cy.contains('Title 1 Author 1')
+        .find('.remove-button')
+        .should('not.exist');
+    });
   });
 });
